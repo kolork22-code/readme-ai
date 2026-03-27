@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReadmeAI — Generate Beautiful READMEs</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+–bg: #0a0a0f;
+–surface: #13131a;
+–surface2: #1c1c27;
+–border: #2a2a3d;
+–accent: #7c6aff;
+–accent2: #ff6a9b;
+–text: #e8e8f0;
+–muted: #6b6b8a;
+–green: #4ade80;
+–mono: ‘DM Mono’, monospace;
+–sans: ‘Syne’, sans-serif;
+}
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: var(–sans);
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+/* Background grid */
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background-image:
+linear-gradient(rgba(124,106,255,0.04) 1px, transparent 1px),
+linear-gradient(90deg, rgba(124,106,255,0.04) 1px, transparent 1px);
+background-size: 48px 48px;
+pointer-events: none;
+z-index: 0;
+}
+
+/* Glow orbs */
+.orb {
+position: fixed;
+border-radius: 50%;
+filter: blur(120px);
+pointer-events: none;
+z-index: 0;
+}
+.orb1 { width: 500px; height: 500px; background: rgba(124,106,255,0.12); top: -100px; right: -100px; }
+.orb2 { width: 400px; height: 400px; background: rgba(255,106,155,0.08); bottom: -100px; left: -100px; }
+
+.container {
+position: relative;
+z-index: 1;
+max-width: 900px;
+margin: 0 auto;
+padding: 0 24px 80px;
+}
+
+/* Header */
+header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 28px 0 48px;
+border-bottom: 1px solid var(–border);
+margin-bottom: 56px;
+animation: fadeDown 0.6s ease both;
+}
+
+.logo {
+display: flex;
+align-items: center;
+gap: 10px;
+font-size: 20px;
+font-weight: 800;
+letter-spacing: -0.5px;
+}
+
+.logo-dot {
+width: 10px; height: 10px;
+background: var(–accent);
+border-radius: 50%;
+box-shadow: 0 0 12px var(–accent);
+animation: pulse 2s ease infinite;
+}
+
+.badge {
+font-family: var(–mono);
+font-size: 11px;
+color: var(–accent);
+background: rgba(124,106,255,0.12);
+border: 1px solid rgba(124,106,255,0.25);
+padding: 4px 10px;
+border-radius: 20px;
+letter-spacing: 0.5px;
+}
+
+/* Hero */
+.hero {
+text-align: center;
+margin-bottom: 56px;
+animation: fadeUp 0.7s ease 0.1s both;
+}
+
+.hero h1 {
+font-size: clamp(36px, 6vw, 64px);
+font-weight: 800;
+line-height: 1.1;
+letter-spacing: -2px;
+margin-bottom: 16px;
+}
+
+.hero h1 span {
+background: linear-gradient(135deg, var(–accent), var(–accent2));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.hero p {
+color: var(–muted);
+font-size: 16px;
+font-family: var(–mono);
+letter-spacing: 0.3px;
+}
+
+/* Form card */
+.card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 32px;
+margin-bottom: 24px;
+animation: fadeUp 0.7s ease 0.2s both;
+}
+
+.section-label {
+font-family: var(–mono);
+font-size: 11px;
+color: var(–accent);
+letter-spacing: 2px;
+text-transform: uppercase;
+margin-bottom: 20px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.section-label::after {
+content: ‘’;
+flex: 1;
+height: 1px;
+background: var(–border);
+}
+
+.grid2 {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 16px;
+}
+
+@media (max-width: 600px) { .grid2 { grid-template-columns: 1fr; } }
+
+.field {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.field.full { grid-column: 1 / -1; }
+
+label {
+font-size: 12px;
+font-family: var(–mono);
+color: var(–muted);
+letter-spacing: 0.5px;
+}
+
+input, textarea, select {
+background: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 8px;
+color: var(–text);
+font-family: var(–mono);
+font-size: 14px;
+padding: 12px 14px;
+outline: none;
+transition: border-color 0.2s, box-shadow 0.2s;
+width: 100%;
+resize: none;
+}
+
+input:focus, textarea:focus, select:focus {
+border-color: var(–accent);
+box-shadow: 0 0 0 3px rgba(124,106,255,0.12);
+}
+
+input::placeholder, textarea::placeholder { color: #3a3a55; }
+
+select option { background: var(–surface2); }
+
+.checkboxes {
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+margin-top: 4px;
+}
+
+.check-item {
+display: flex;
+align-items: center;
+gap: 7px;
+background: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 8px 14px;
+cursor: pointer;
+transition: all 0.15s;
+font-family: var(–mono);
+font-size: 13px;
+user-select: none;
+}
+
+.check-item:hover { border-color: var(–accent); background: rgba(124,106,255,0.07); }
+.check-item.active { border-color: var(–accent); background: rgba(124,106,255,0.12); color: #c4bcff; }
+
+.check-dot {
+width: 7px; height: 7px;
+border-radius: 50%;
+background: var(–muted);
+transition: background 0.15s;
+}
+
+.check-item.active .check-dot { background: var(–accent); box-shadow: 0 0 6px var(–accent); }
+
+/* Generate button */
+.btn-generate {
+width: 100%;
+padding: 16px;
+background: linear-gradient(135deg, var(–accent), #9b6bff);
+border: none;
+border-radius: 10px;
+color: #fff;
+font-family: var(–sans);
+font-size: 15px;
+font-weight: 700;
+letter-spacing: 0.3px;
+cursor: pointer;
+transition: all 0.2s;
+position: relative;
+overflow: hidden;
+margin-top: 8px;
+}
+
+.btn-generate::before {
+content: ‘’;
+position: absolute;
+inset: 0;
+background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+opacity: 0;
+transition: opacity 0.2s;
+}
+
+.btn-generate:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(124,106,255,0.35); }
+.btn-generate:hover::before { opacity: 1; }
+.btn-generate:active { transform: translateY(0); }
+.btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Loading */
+.loading {
+display: none;
+align-items: center;
+justify-content: center;
+gap: 10px;
+padding: 32px;
+color: var(–muted);
+font-family: var(–mono);
+font-size: 13px;
+}
+
+.spinner {
+width: 18px; height: 18px;
+border: 2px solid var(–border);
+border-top-color: var(–accent);
+border-radius: 50%;
+animation: spin 0.8s linear infinite;
+}
+
+/* Output */
+.output-card {
+display: none;
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 16px;
+overflow: hidden;
+animation: fadeUp 0.5s ease both;
+}
+
+.output-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 16px 24px;
+border-bottom: 1px solid var(–border);
+background: var(–surface2);
+}
+
+.output-title {
+font-family: var(–mono);
+font-size: 12px;
+color: var(–muted);
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.output-title::before {
+content: ‘’;
+width: 8px; height: 8px;
+background: var(–green);
+border-radius: 50%;
+box-shadow: 0 0 8px var(–green);
+}
+
+.btn-copy {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 7px;
+color: var(–muted);
+font-family: var(–mono);
+font-size: 12px;
+padding: 7px 14px;
+cursor: pointer;
+transition: all 0.15s;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.btn-copy:hover { border-color: var(–accent); color: var(–accent); }
+.btn-copy.copied { border-color: var(–green); color: var(–green); }
+
+#readme-output {
+padding: 24px;
+font-family: var(–mono);
+font-size: 13px;
+line-height: 1.7;
+color: #c8c8e0;
+white-space: pre-wrap;
+word-break: break-word;
+max-height: 600px;
+overflow-y: auto;
+scrollbar-width: thin;
+scrollbar-color: var(–border) transparent;
+}
+
+/* Streaming cursor */
+.cursor {
+display: inline-block;
+width: 2px;
+height: 14px;
+background: var(–accent);
+animation: blink 0.8s step-end infinite;
+vertical-align: middle;
+margin-left: 2px;
+}
+
+/* Animations */
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 12px var(–accent); } 50% { box-shadow: 0 0 24px var(–accent); } }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+</style>
+
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-dot"></div>
+      ReadmeAI
+    </div>
+    <div class="badge">POWERED BY CLAUDE</div>
+  </header>
+
+  <div class="hero">
+    <h1>Generate a <span>perfect README</span><br>in seconds</h1>
+    <p>// describe your project → get a professional README.md</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Project Info</div>
+    <div class="grid2">
+      <div class="field">
+        <label>PROJECT NAME</label>
+        <input type="text" id="proj-name" placeholder="my-awesome-tool" />
+      </div>
+      <div class="field">
+        <label>TECH STACK</label>
+        <input type="text" id="proj-stack" placeholder="Python, FastAPI, Docker" />
+      </div>
+      <div class="field full">
+        <label>WHAT DOES YOUR PROJECT DO?</label>
+        <textarea id="proj-desc" rows="3" placeholder="A CLI tool that automatically renames files based on their content using AI..."></textarea>
+      </div>
+      <div class="field">
+        <label>TARGET AUDIENCE</label>
+        <input type="text" id="proj-audience" placeholder="Developers, data scientists..." />
+      </div>
+      <div class="field">
+        <label>README LANGUAGE</label>
+        <select id="proj-lang">
+          <option value="English">English</option>
+          <option value="Russian">Russian</option>
+          <option value="Spanish">Spanish</option>
+          <option value="German">German</option>
+        </select>
+      </div>
+    </div>
+
+```
+<div style="margin-top: 24px;">
+  <div class="section-label">Include Sections</div>
+  <div class="checkboxes" id="sections">
+    <div class="check-item active" data-val="Features">
+      <div class="check-dot"></div>✦ Features
+    </div>
+    <div class="check-item active" data-val="Installation">
+      <div class="check-dot"></div>⚙ Installation
+    </div>
+    <div class="check-item active" data-val="Usage">
+      <div class="check-dot"></div>▶ Usage
+    </div>
+    <div class="check-item active" data-val="Contributing">
+      <div class="check-dot"></div>🤝 Contributing
+    </div>
+    <div class="check-item" data-val="License">
+      <div class="check-dot"></div>📄 License
+    </div>
+    <div class="check-item" data-val="Roadmap">
+      <div class="check-dot"></div>🗺 Roadmap
+    </div>
+    <div class="check-item" data-val="FAQ">
+      <div class="check-dot"></div>❓ FAQ
+    </div>
+    <div class="check-item" data-val="Badges">
+      <div class="check-dot"></div>🏷 Badges
+    </div>
+  </div>
+</div>
+
+<button class="btn-generate" id="btn-gen" onclick="generateReadme()">
+  ✦ Generate README
+</button>
+```
+
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    Generating your README...
+  </div>
+
+  <div class="output-card" id="output-card">
+    <div class="output-header">
+      <div class="output-title">README.md — ready</div>
+      <button class="btn-copy" id="btn-copy" onclick="copyOutput()">
+        ⎘ Copy markdown
+      </button>
+    </div>
+    <div id="readme-output"></div>
+  </div>
+</div>
+
+<script>
+  // Toggle checkboxes
+  document.querySelectorAll('.check-item').forEach(el => {
+    el.addEventListener('click', () => el.classList.toggle('active'));
+  });
+
+  function getSelectedSections() {
+    return [...document.querySelectorAll('.check-item.active')]
+      .map(el => el.dataset.val).join(', ');
+  }
+
+  async function generateReadme() {
+    const name = document.getElementById('proj-name').value.trim();
+    const desc = document.getElementById('proj-desc').value.trim();
+    const stack = document.getElementById('proj-stack').value.trim();
+    const audience = document.getElementById('proj-audience').value.trim();
+    const lang = document.getElementById('proj-lang').value;
+    const sections = getSelectedSections();
+
+    if (!name || !desc) {
+      document.getElementById('proj-name').focus();
+      document.getElementById('proj-name').style.borderColor = '#ff6a9b';
+      setTimeout(() => document.getElementById('proj-name').style.borderColor = '', 2000);
+      return;
+    }
+
+    const btn = document.getElementById('btn-gen');
+    const loading = document.getElementById('loading');
+    const outputCard = document.getElementById('output-card');
+    const output = document.getElementById('readme-output');
+
+    btn.disabled = true;
+    loading.style.display = 'flex';
+    outputCard.style.display = 'none';
+    output.textContent = '';
+
+    const prompt = `Generate a professional, well-structured README.md file in ${lang} for the following project:
+
+Project Name: ${name}
+Description: ${desc}
+Tech Stack: ${stack || 'not specified'}
+Target Audience: ${audience || 'developers'}
+Sections to include: ${sections}
+
+Requirements:
+- Use proper Markdown formatting with headers, code blocks, and badges where appropriate
+- Make it engaging, clear, and professional
+- Include relevant emojis for section headers
+- Add a proper installation section with code examples
+- Make it ready to copy-paste directly to GitHub
+- Start with the project name as H1
+
+Output only the raw markdown, nothing else.`;
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          stream: true,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+
+      outputCard.style.display = 'block';
+      loading.style.display = 'none';
+
+      // Add cursor
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor';
+      output.appendChild(cursor);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6);
+          if (data === '[DONE]') continue;
+          try {
+            const json = JSON.parse(data);
+            if (json.type === 'content_block_delta' && json.delta?.text) {
+              output.insertBefore(document.createTextNode(json.delta.text), cursor);
+              output.scrollTop = output.scrollHeight;
+            }
+          } catch {}
+        }
+      }
+
+      cursor.remove();
+    } catch (err) {
+      loading.style.display = 'none';
+      outputCard.style.display = 'block';
+      output.textContent = '❌ Error: ' + err.message;
+    }
+
+    btn.disabled = false;
+  }
+
+  function copyOutput() {
+    const text = document.getElementById('readme-output').textContent;
+    navigator.clipboard.writeText(text);
+    const btn = document.getElementById('btn-copy');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '⎘ Copy markdown';
+      btn.classList.remove('copied');
+    }, 2000);
+  }
+</script>
+
+</body>
+</html>
